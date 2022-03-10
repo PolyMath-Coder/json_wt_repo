@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { isEmail } = require('validator');
+const bcrypt = require('bcrypt');
 
 const { Schema } = mongoose;
 
@@ -17,6 +18,19 @@ const userSchema = new Schema({
     minlength: [6, 'Minimum password length is 6 characters'],
   },
 });
+//fire a function after doc saved to Database
+userSchema.post('save', (doc, next) => {
+  console.log('new user was created & saved', doc);
+  next();
+});
+
+//Fire a function before doc saved to Database
+userSchema.pre('save', async function(next) {
+  const salt = await bcrypt.genSalt();
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
 const User = mongoose.model('user', userSchema);
 
 module.exports = User;
