@@ -1,4 +1,6 @@
 // signup_get signup-post
+const User = require('../models/User');
+const jwt = require('jsonwebtoken');
 
 // handle Errors
 const handleErrors = (err) => {
@@ -19,8 +21,12 @@ const handleErrors = (err) => {
   }
   return errors;
 };
-
-const User = require('../models/User');
+const maxAge = 3 * 24 * 60 * 60;
+const createToken = (id) => {
+  return jwt.sign({ id }, 'polymathsecret', {
+    expiresIn: maxAge,
+  });
+};
 
 const signup_get = (req, res) => {
   res.render('signup');
@@ -38,7 +44,10 @@ const signup_post = async (req, res) => {
       password: req.body.password,
     });
     const savedUser = await newUser.save();
-    res.status(200).json(savedUser);
+    const token = createToken(savedUser._id)
+    res.cookie('jwt', token, {httpOnly: true, maxAge: maxAge * 1000})
+
+    res.status(200).json({savedUser: savedUser._id});
   } catch (err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
