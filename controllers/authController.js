@@ -13,6 +13,16 @@ const handleErrors = (err) => {
     return errors;
   }
 
+  //Incorrect email
+  if (err.message === 'Incorrect email') {
+    errors.email = 'This email is not registered';
+  }
+
+  //Incorrect Password
+  if (err.message === 'Incorrect Password') {
+    errors.password = 'This Password is totally incorrect';
+  }
+
   //validation errors
   if (err.message.includes('user validation failed')) {
     Object.values(err.errors).forEach(({ properties }) => {
@@ -45,7 +55,7 @@ const signup_post = async (req, res) => {
     });
     const savedUser = await newUser.save();
     const token = createToken(savedUser._id);
-    res.cookie(' my_jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
 
     res.status(200).json({ savedUser: savedUser._id });
   } catch (err) {
@@ -58,10 +68,18 @@ const login_post = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.login(email, password);
+    const token = createToken(user._id);
+    res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
     res.status(200).json({ user: user._id });
   } catch (err) {
-    res.status(400).json({});
+    const errors = handleErrors(err);
+    res.status(400).json({ errors });
   }
+};
+
+const logout_get = (req, res) => {
+  res.cookie('jwt', '', { maxAge: 1 });
+  res.redirect('/');
 };
 
 module.exports = {
@@ -69,4 +87,5 @@ module.exports = {
   signup_post,
   login_get,
   login_post,
+  logout_get,
 };
