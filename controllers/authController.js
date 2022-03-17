@@ -44,20 +44,24 @@ const signup_post = async (req, res) => {
       password: req.body.password,
     });
     const savedUser = await newUser.save();
-    const token = createToken(savedUser._id)
-    res.cookie('jwt', token, {httpOnly: true, maxAge: maxAge * 1000})
+    const token = createToken(savedUser._id);
+    res.cookie(' my_jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
 
-    res.status(200).json({savedUser: savedUser._id});
+    res.status(200).json({ savedUser: savedUser._id });
   } catch (err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
   }
 };
 
-const login_post = (req, res) => {
+const login_post = async (req, res) => {
   const { email, password } = req.body;
-  console.log(email, password);
-  res.send('user login');
+  try {
+    const user = await User.login(email, password);
+    res.status(200).json({ user: user._id });
+  } catch (err) {
+    res.status(400).json({});
+  }
 };
 
 module.exports = {
