@@ -3,6 +3,12 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes');
 const { requireAuth, checkUser } = require('./middleware/authMiddleware');
+require('dotenv').config();
+
+const port = process.env.PORT;
+
+const connect = require('./helpers/mongoose');
+
 const app = express();
 
 // middleware
@@ -15,20 +21,10 @@ app.use(cookieParser());
 app.set('view engine', 'ejs');
 
 // database connection
-const dbURI =
-  'mongodb+srv://Ayoluwa:%40Faithie123@cluster0.nm9b8.mongodb.net/node_jwt_auth?retryWrites=true&w=majority';
-
-mongoose
-  .connect(dbURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then((result) => console.log('Now connected to our Database...'))
-  .catch((err) => console.log(err));
 
 // const database = mongoose.connection();
 
-// database.on('error', () => {
+// database.on('error', (e) => {
 //   console.log('Oops! There has been an error...');
 // });
 
@@ -60,7 +56,8 @@ app.use(authRoutes);
 //   res.json(cookies);
 // });
 
-const port = 3000;
 app.listen(port, () => {
   console.log(`Server is listening at port ${port}`);
 });
+
+connect();

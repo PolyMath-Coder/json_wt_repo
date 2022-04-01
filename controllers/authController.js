@@ -1,6 +1,8 @@
 // signup_get signup-post
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { AppError } = require('../helpers/error');
+const { ValidationError } = require('../helpers/error');
 
 // handle Errors
 const handleErrors = (err) => {
@@ -60,7 +62,9 @@ const signup_post = async (req, res) => {
     res.status(200).json({ savedUser: savedUser._id });
   } catch (err) {
     const errors = handleErrors(err);
-    res.status(400).json({ errors });
+    res.status(400).json(new ValidationError('Kindly enter a valid email', ''));
+    // res.status(400).json({ errors });
+    // res.status(400).json(new AppError(400, 'Kindly enter a valid email'));
   }
 };
 
